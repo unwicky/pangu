@@ -22,6 +22,7 @@
 typedef struct {
     int tag;
     char url[MAX_URL_LEN];
+    int depth;
     at_hashmap_t *heads;
     at_string_t *body;
     at_hashmap_t *ctx;

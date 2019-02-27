@@ -26,7 +26,6 @@ static void free_crawl_task(at_task_t **task_ptr) {
 static void *do_crawl(void *ptr) {
     int i = 0;
     pg_page_t *page = (pg_page_t *)ptr;
-    pthread_mutex_lock(&lock);
     for (i = 0; extensions[i]; i++) {
         if (!extensions[i]->handle(page->ctx, page)) {
             break;
@@ -39,14 +38,15 @@ static void *do_crawl(void *ptr) {
         string_free(&page->body);
     }
     free(page);
-    pthread_mutex_unlock(&lock);
-    usleep(10000);
     return NULL;
 }
 
 static at_task_t *new_crawl_task(at_hashmap_t *ctx, at_stack_t *pages) {
     at_task_t *task = (at_task_t *)malloc(sizeof(at_task_t));
+    pthread_mutex_lock(&lock);
     pg_page_t *page = (pg_page_t *)stack_pop(pages);
+    printf("url=%s,depth=%d\n", page->url, page->depth);
+    pthread_mutex_unlock(&lock);
     task->run = do_crawl;
     task->params = page;
     task->free_task = free_crawl_task;
@@ -80,6 +80,7 @@ void main() {
     pg_page_t *page = (pg_page_t *)malloc(sizeof(pg_page_t));
     snprintf(page->url, MAX_URL_LEN, "https://www.huawei.com");
     page->ctx = ctx;
+    page->depth = 1;
     stack_push(pages, page);
     hashmap_insert(ctx, "pageset", pages);
     pthread_mutex_init(&lock, NULL);
@@ -94,6 +95,7 @@ void main() {
             at_task_t *task = new_crawl_task(ctx, pages);
             thread_pool_add_task(spiders, task);
         } else {
+            //printf("%d-%d\n", stack_isempty(pages), thread_pool_is_all_idle(spiders));
             usleep(10000);
         }
     }   

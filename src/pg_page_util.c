@@ -80,30 +80,54 @@ int pg_get_line (char **html_ptr, char *text_line, int max_len) {
 
 int pg_url_relative_to_absolute (const char *parent_url, char *url,
         int url_len, int len_limit) {
-    int domain_len = 0, new_url_len = 0;
-    if (*url == '.' || strncmp(url, "http://", 7) == 0
-            || strncmp(url, "https://", 8) == 0) {
-        return 0;
+    if (strncmp(url, "http://", 7) == 0 || strncmp(url, "https://", 8) == 0) {
+        return url_len;
     }
-    const char *parent_url_cursor = parent_url, *parent_url_seg = NULL;
+    int terminal_indexes[100] = {0}, seg_num = 0, real_level = 0, domain_len = 0, new_url_len = 0;
+    const char *parent_url_cursor = parent_url, *url_cursor = url;
+    char tmp[MAX_URL_LEN] = {0};
     if (strncmp(parent_url_cursor, "http://", 7) == 0) {
         parent_url_cursor += 7;
     } else if (strncmp(parent_url_cursor, "https://", 8) == 0) {
         parent_url_cursor += 8;
     }
-    if (*url == '/') {
-        parent_url_seg = strchr(parent_url_cursor, '/');
-        domain_len = parent_url_seg - parent_url;
-    } else if (*url != '.') {
-        parent_url_seg = strrchr(parent_url_cursor, '/');
-        domain_len = parent_url_seg - parent_url + 1;
+    while (*parent_url_cursor != '\0') {
+        if (*parent_url_cursor == '/') {
+                terminal_indexes[seg_num++] = parent_url_cursor - parent_url; 
+        }
+        parent_url_cursor++;
     }
-    domain_len = domain_len <= 0 ? strlen(parent_url) : domain_len;
-    new_url_len = domain_len + url_len;
-    char tmp[new_url_len];
-    memcpy(tmp, parent_url, domain_len);
-    memcpy(tmp + domain_len, url, url_len);
-    new_url_len = new_url_len > len_limit ? len_limit : new_url_len;
+    if (*url_cursor == '/') {
+        url_cursor++;
+        domain_len = terminal_indexes[0];
+    } else {
+        while (*url_cursor == '.') {
+            if (strncmp(url_cursor, "./", 2) == 0) {
+                url_cursor += 2;
+                url_len -= 2;
+            } else if (strncmp(url_cursor, "../", 3) == 0) {
+                url_cursor += 3;
+                url_len -= 3;
+                real_level++;
+            } else {
+                break;
+            }
+        }
+        if (seg_num <= real_level) {
+            domain_len = terminal_indexes[0];
+        } else {
+            domain_len = terminal_indexes[seg_num - real_level - 1];
+        }
+    }
+    if (domain_len == 0) {
+        domain_len = strlen(parent_url);
+        memcpy(tmp, parent_url, domain_len);
+        tmp[domain_len] = '/';
+    } else {
+        memcpy(tmp, parent_url, domain_len + 1);
+    }
+    memcpy(tmp + domain_len + 1, url_cursor, url_len);
+    new_url_len = (domain_len + url_len + 1) > len_limit ? len_limit : (domain_len + url_len + 1);
     memcpy(url, tmp, new_url_len);
     url[new_url_len++] = '\0';
     return new_url_len;
