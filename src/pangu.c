@@ -95,6 +95,7 @@ void main() {
             at_task_t *task = new_crawl_task(ctx, pages);
             thread_pool_add_task(spiders, task);
         } else {
+		    printf("hi,i'm a new committer\n");
             usleep(10000);
         }
     }   
