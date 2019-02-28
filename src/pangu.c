@@ -45,7 +45,7 @@ static at_task_t *new_crawl_task(at_hashmap_t *ctx, at_stack_t *pages) {
     at_task_t *task = (at_task_t *)malloc(sizeof(at_task_t));
     pthread_mutex_lock(&lock);
     pg_page_t *page = (pg_page_t *)stack_pop(pages);
-    //printf("url=%s,depth=%d\n", page->url, page->depth);
+    printf("url=%s,depth=%d\n", page->url, page->depth);
     pthread_mutex_unlock(&lock);
     task->run = do_crawl;
     task->params = page;
