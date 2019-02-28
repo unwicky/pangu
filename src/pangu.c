@@ -95,7 +95,6 @@ void main() {
             at_task_t *task = new_crawl_task(ctx, pages);
             thread_pool_add_task(spiders, task);
         } else {
-            //printf("%d-%d\n", stack_isempty(pages), thread_pool_is_all_idle(spiders));
             usleep(10000);
         }
     }   
