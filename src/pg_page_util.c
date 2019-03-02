@@ -152,8 +152,8 @@ int pg_next_url(char *url, int len) {
             break;
         }
         html++;
-        if (*html == '<' && strncasecmp(html, "<a", 2) == 0) {
-            html+=2;
+        if (*html == 'a' || *html == 'A') {
+            html++;
             for (; *html != 'h' && *html != '\0'; html++);
             if (*html == '\0') {
                 break;
