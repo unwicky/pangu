@@ -18,6 +18,6 @@ int pg_url_relative_to_absolute (const char *, char *, int , int );
 
 int pg_extract_url(char **, char *, int);
 
-int pg_next_url(char *, int);
+int pg_next_url(char **, char *, int);
 
 #endif /* PG_PAGE_UTIL_H_ */
