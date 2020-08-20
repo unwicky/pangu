@@ -50,7 +50,7 @@ static at_boolean_t pg_parse_url (at_hashmap_t *ctx, pg_page_t *page) {
                 pthread_mutex_unlock(lock);
             }
         }
-        url_len = pg_next_url(url, MAX_URL_LEN);
+        url_len = pg_next_url(&html, url, MAX_URL_LEN);
     }
     return ret;
 }
