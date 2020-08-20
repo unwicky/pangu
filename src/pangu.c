@@ -31,10 +31,10 @@ static void *do_crawl(void *ptr) {
             break;
         }
     }
-    if (!page->heads) {
+    if (page->heads) {
         hashmap_free(&page->heads);
     }
-    if (!page->body) {
+    if (page->body) {
         string_free(&page->body);
     }
     free(page);
