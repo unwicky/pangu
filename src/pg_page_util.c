@@ -11,8 +11,6 @@
 #include "pg_page_util.h"
 #include "pg_types.h"
 
-static char *html;
-
 int pg_get_text_line (char **html_ptr, char *text_line, int max_len) {
     int len = 0;
     char *html = *html_ptr;
@@ -137,14 +135,14 @@ int pg_extract_url(char **html_ptr, char *url, int len) {
     if (!html_ptr || !(*html_ptr) || !url) {
         return -1;
     }
-    html = *html_ptr;
     return pg_next_url(url, len);
 }
 
-int pg_next_url(char *url, int len) {
+int pg_next_url(char **html_ptr, char *url, int len) {
     if (!url) {
         return -1;
     }
+    char *html = *html_ptr;
     int exact_len = -1;
     while (*html != '\0') {
         for (; *html != '<' && *html != '\0'; html++);
@@ -180,5 +178,6 @@ int pg_next_url(char *url, int len) {
             }
         }
     }
+    *html_ptr = html;
     return exact_len;
 }
